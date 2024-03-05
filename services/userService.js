@@ -101,6 +101,7 @@ const verifyCodeService = async ({ user, code }) => {
     try {
         if (user.oneTimeCode === code) {
             user.oneTimeCode = "Verified";
+            user.isVerified = true;
             await user.save();
             
             // Set a timeout to reset oneTimeCode to null after 3 minutes
@@ -136,7 +137,7 @@ const changePasswordService = async ({user, password}) => {
     }
 }
 
-const getUserService = async (req) => {
+const getUserService = async () => {
     
     try {
         const user = await User.find({});
@@ -148,11 +149,22 @@ const getUserService = async (req) => {
     }
 }
 
+const getSingleUserService = async (id) => {
+    try {
+        const user = await User.findById(id);
+        return user;
+    } catch (error) {
+        console.error("Error in getSingleUser service:", error);
+        throw new Error("Error occurred while getting user");
+    }
+};
+
 module.exports = {
     userRegister,
     userLogin,
     forgotPasswordService,
     verifyCodeService,
     changePasswordService,
-    getUserService
+    getUserService,
+    getSingleUserService
 };

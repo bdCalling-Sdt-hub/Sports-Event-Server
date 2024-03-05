@@ -8,6 +8,7 @@ var logger = require('morgan');
 //import routes
 const userRouter = require('./routes/userRouter');
 const subscriptionRouter = require('./routes/subscriptionRouter');
+const eventsRouter = require('./routes/eventsRouter');
 const { connectToDatabase } = require('./helpers/connection');
 const validateResponse = require('./middlewares.js/validator');
 
@@ -31,6 +32,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //Routes
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/subscription', subscriptionRouter);
+app.use('/api/v1/events', eventsRouter);
 
 // test route
 app.get('/api/test', (req, res) => {

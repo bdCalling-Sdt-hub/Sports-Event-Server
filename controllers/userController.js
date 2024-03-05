@@ -1,4 +1,4 @@
-const { userRegister, userLogin, forgotPasswordService, verifyCodeService, changePasswordService, getUserService } = require("../services/userService");
+const { userRegister, userLogin, forgotPasswordService, verifyCodeService, changePasswordService, getUserService, getSingleUserService } = require("../services/userService");
 const Response = require("../helpers/response");
 const User = require("../models/User");
 const bcrypt = require('bcryptjs');
@@ -58,6 +58,9 @@ const signIn = async (req, res, next) => {
         // Find the user by email
         const user = await User.findOne({ email });
         console.log("-------------->>>>>", user)
+        if(!user.isVerified){
+            return res.status(401).json(Response({ statusCode: 401, message: 'You are not verified', status: "Unauthorized" }));
+        }
 
         if (!user) {
             return res.status(404).json(Response({ statusCode: 404, message: 'User not found', status: "Failed" }));
@@ -168,11 +171,24 @@ const getUser = async (req, res) => {
     }
 };
 
+const singleUser = async (req, res) => {
+    try {
+        
+        let user = await getSingleUserService(req.params.id);
+
+        res.status(200).json(Response({ message: "User fetched successfully", type: "User", data: user, status: "OK", statusCode: 200 }))
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json(Response({ message: "Internal server error" }))
+    }
+};
+
 module.exports = {
     signUp,
     signIn,
     forgotPassword,
     verifyCode,
     cahngePassword,
-    getUser
+    getUser,
+    singleUser
 };

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 //import controllers
-const { signUp, signIn, forgotPassword, verifyCode, cahngePassword, getUser } = require('../controllers/userController');
+const { signUp, signIn, forgotPassword, verifyCode, cahngePassword, getUser, singleUser } = require('../controllers/userController');
 const upload = require('../middlewares.js/fileUpload');
 console.log('userController');
 
@@ -13,5 +13,6 @@ router.post('/forgot-password', forgotPassword);
 router.post('/verify-code', verifyCode);
 router.post('/change-password', cahngePassword);
 router.get('/', getUser);
+router.get('/:id', singleUser);
 
 module.exports = router;
