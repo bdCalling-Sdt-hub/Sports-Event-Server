@@ -47,6 +47,17 @@ const userRegister = async (userDetails) => {
     }
 };
 
+const updateUserService = async (userId, userDetails) => {
+    try {
+        // const user = await User.findById(userId);
+        let updatedUser = await User.findByIdAndUpdate(userId, userDetails, { new: true });
+        return updatedUser;
+    } catch (error) {
+        console.error("Error in updateUserService service:", error);
+        throw new Error("Error occurred while updating user");
+    }
+}
+
 const userLogin = async ({ email, password, user }) => {
     try {
         const expiresInOneYear = 365 * 24 * 60 * 60; // seconds in 1 year
@@ -166,5 +177,6 @@ module.exports = {
     verifyCodeService,
     changePasswordService,
     getUserService,
-    getSingleUserService
+    getSingleUserService,
+    updateUserService
 };

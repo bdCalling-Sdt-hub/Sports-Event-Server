@@ -1,8 +1,10 @@
-const { userRegister, userLogin, forgotPasswordService, verifyCodeService, changePasswordService, getUserService, getSingleUserService } = require("../services/userService");
+const { userRegister, userLogin, forgotPasswordService, verifyCodeService, changePasswordService, getUserService, getSingleUserService, updateUserService } = require("../services/userService");
 const Response = require("../helpers/response");
 const User = require("../models/User");
 const bcrypt = require('bcryptjs');
+
 const { createJSONWebToken } = require('../helpers/jsonWebToken');
+const { deleteImage } = require("../helpers/deleteImage");
 
 //sign up user
 const signUp = async (req, res) => {
@@ -45,6 +47,46 @@ const signUp = async (req, res) => {
     } catch (error) {
         console.error("Error in signUp controller:", error);
         res.status(500).json({ error: "Server error" });
+    }
+};
+
+const updateUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findById(userId);
+        console.log("-----------",user)
+        if (!user) {
+            return res.status(404).json(Response({ message: "User not found" }));
+        }
+        
+        const loggedInUser = req.body.userId;
+        if(userId !== loggedInUser){
+            return res.status(401).json(Response({message: "You are not authorzed", status: "Unautorized", statusCode: 401, type: "User"}));
+        }
+
+        let imagePath = user.image.path;
+
+        const image = req.file;
+        // delete image if req.file contain image
+        if(!image){
+            deleteImage(imagePath);
+        }
+        user.image.path;
+        await user.save();
+        const { name, email, password } = req.body;
+        let userDetails = {
+            name,
+            email,
+            password,
+            image
+        };
+        //Send the updated user details to the service function
+        let updatedUser = await updateUserService(userId, userDetails);
+
+        res.status(200).json(Response({ message: "User updated successfully", data: updatedUser, status: "Okay", statusCode: 200, type: "User"}));
+    } catch (error) {
+        console.error("Error in updateUser controller:", error);
+        res.status(500).json(Response({message: "Internal server Error"}));
     }
 };
 
@@ -190,5 +232,6 @@ module.exports = {
     verifyCode,
     cahngePassword,
     getUser,
-    singleUser
+    singleUser,
+    updateUser
 };
