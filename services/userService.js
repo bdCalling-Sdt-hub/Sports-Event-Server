@@ -58,6 +58,16 @@ const updateUserService = async (userId, userDetails) => {
     }
 }
 
+const deleteUserService = async (userId) => {
+    try {
+        const user = await User.findByIdAndDelete(userId);
+        return user;
+    } catch (error) {
+        console.error("Error in deleteUserService service:", error);
+        throw new Error("Error occurred while deleting user");
+    }
+}
+
 const userLogin = async ({ email, password, user }) => {
     try {
         const expiresInOneYear = 365 * 24 * 60 * 60; // seconds in 1 year
@@ -178,5 +188,6 @@ module.exports = {
     changePasswordService,
     getUserService,
     getSingleUserService,
-    updateUserService
+    updateUserService,
+    deleteUserService
 };

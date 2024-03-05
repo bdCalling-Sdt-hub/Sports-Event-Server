@@ -1,4 +1,4 @@
-const { userRegister, userLogin, forgotPasswordService, verifyCodeService, changePasswordService, getUserService, getSingleUserService, updateUserService } = require("../services/userService");
+const { userRegister, userLogin, forgotPasswordService, verifyCodeService, changePasswordService, getUserService, getSingleUserService, updateUserService, deleteUserService } = require("../services/userService");
 const Response = require("../helpers/response");
 const User = require("../models/User");
 const bcrypt = require('bcryptjs');
@@ -86,6 +86,31 @@ const updateUser = async (req, res) => {
         res.status(200).json(Response({ message: "User updated successfully", data: updatedUser, status: "Okay", statusCode: 200, type: "User"}));
     } catch (error) {
         console.error("Error in updateUser controller:", error);
+        res.status(500).json(Response({message: "Internal server Error"}));
+    }
+};
+
+const deleteUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json(Response({ message: "User not found" }));
+        }
+
+        const loggedInUser = req.body.userId;
+        if(userId !== loggedInUser){
+            return res.status(401).json(Response({message: "You are not authorzed", status: "Unautorized", statusCode: 401, type: "User"}));
+        }
+
+        // call delete image function
+        deleteImage(user.image.path);
+        //Call service function
+        await deleteUserService(userId);
+
+        res.status(200).json(Response({ message: "User deleted successfully", status: "Okay", statusCode: 200, type: "User",}));
+    } catch (error) {
+        console.error("Error in deleteUser controller:", error);
         res.status(500).json(Response({message: "Internal server Error"}));
     }
 };
@@ -233,5 +258,6 @@ module.exports = {
     cahngePassword,
     getUser,
     singleUser,
-    updateUser
+    updateUser,
+    deleteUser
 };
