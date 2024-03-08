@@ -4,10 +4,7 @@ module.exports = {
     // Connect to the MongoDB database
     connectToDatabase: async () => {
         try {
-            await mongoose.connect(process.env.MONGODB_CONNECTION, {
-                useNewUrlParser: true,
-                useUnifiedTopology: true, // Corrected to true
-            });
+            await mongoose.connect(process.env.MONGODB_CONNECTION);
             console.log('Connected to MongoDB');
         } catch (error) {
             console.error('Error connecting to MongoDB:', error);

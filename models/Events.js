@@ -7,6 +7,7 @@ const eventsSchema = new mongoose.Schema({
     startedIn: { type: String, required: true },
     description: { type: String, required: true },
     image: { type:  Object, required: false },
+    createdBy: { type: mongoose.Types.ObjectId, required: false }
 }, {timeStamps: true});
 
 module.exports = mongoose.model('Events', eventsSchema);

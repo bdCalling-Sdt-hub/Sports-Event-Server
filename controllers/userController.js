@@ -1,4 +1,4 @@
-const { userRegister, userLogin, forgotPasswordService, verifyCodeService, changePasswordService, getUserService, getSingleUserService, updateUserService, deleteUserService } = require("../services/userService");
+const { userRegister, userLogin, forgotPasswordService, verifyCodeService, changePasswordService, getUserService, getSingleUserService, updateUserService, deleteUserService, setPasswordService } = require("../services/userService");
 const Response = require("../helpers/response");
 const User = require("../models/User");
 const bcrypt = require('bcryptjs');
@@ -191,6 +191,9 @@ const verifyCode = async (req, res) => {
         if (!user) {
             return res.status(404).json(Response({ statusCode: 404, message: 'User not found', status: "Failed" }));
         }
+        if(code !== user.oneTimeCode){
+            return res.status(401).json(Response({ statusCode: 401, message: 'Invalid code', status: "Failed" }));
+        }
 
         await verifyCodeService({ user, code })
 
@@ -202,7 +205,7 @@ const verifyCode = async (req, res) => {
     }
 };
 
-const cahngePassword = async (req, res) => {
+const setPassword = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -218,12 +221,40 @@ const cahngePassword = async (req, res) => {
             return res.status(404).json(Response({ statusCode: 404, message: 'User not found', status: "Failed" }));
         }
 
-        await changePasswordService({ user, password });
+        await setPasswordService({ user, password });
 
         res.status(200).json(Response({ statusCode: 200, message: 'Password changed successfully', status: "OK" }));
 
     } catch (error) {
         res.status(500).json(Response({ statusCode: 500, message: 'Internal server error', status: "Failed" }));
+    }
+};
+
+const changePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const loggedInUser = await User.findOne({ _id: req.body.userId });
+       console.log("loggedInUser", loggedInUser)
+        if (!loggedInUser) {
+            return res.status(400).json(Response({ message: "Old password is required" }));
+        }
+        if (!oldPassword) {
+            return res.status(400).json(Response({ message: "Old password is required" }));
+        }
+        if (!newPassword) {
+            return res.status(400).json(Response({ message: "New password is required" }));
+        }
+        
+        let isPasswordValid = await bcrypt.compare(oldPassword, loggedInUser.password);
+        if (!isPasswordValid) {
+            return res.status(400).json(Response({ message: "Password does not match" }));
+        }
+        loggedInUser.password = newPassword;
+        await loggedInUser.save();
+        res.status(200).json(Response({ message: "Password changed successfully" }));
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json(Response({ message: "Internal server error" }))
     }
 };
 
@@ -255,9 +286,10 @@ module.exports = {
     signIn,
     forgotPassword,
     verifyCode,
-    cahngePassword,
+    setPassword,
     getUser,
     singleUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    changePassword
 };

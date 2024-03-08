@@ -56,7 +56,7 @@ const updateUserService = async (userId, userDetails) => {
         console.error("Error in updateUserService service:", error);
         throw new Error("Error occurred while updating user");
     }
-}
+};
 
 const deleteUserService = async (userId) => {
     try {
@@ -66,7 +66,7 @@ const deleteUserService = async (userId) => {
         console.error("Error in deleteUserService service:", error);
         throw new Error("Error occurred while deleting user");
     }
-}
+};
 
 const userLogin = async ({ email, password, user }) => {
     try {
@@ -142,7 +142,7 @@ const verifyCodeService = async ({ user, code }) => {
     }
 };
 
-const changePasswordService = async ({user, password}) => {
+const setPasswordService = async ({user, password}) => {
     try {
         if(user.oneTimeCode === "Verified"){
             user.password = password;
@@ -156,7 +156,18 @@ const changePasswordService = async ({user, password}) => {
         console.error("Error in changePassword service:", error);
         throw new Error("Error occurred while changing password");
     }
-}
+};
+
+const changePasswordService = async (user, password) => {
+    try {
+        user.password = password;
+        await user.save();
+        return true;
+    } catch (error) {
+        console.error("Error in changePassword service:", error);
+        throw new Error("Error occurred while changing password");
+    }
+};
 
 const getUserService = async () => {
     
@@ -168,7 +179,7 @@ const getUserService = async () => {
         console.error("Error in getUser service:", error);
         throw new Error("Error occurred while getting user");
     }
-}
+};
 
 const getSingleUserService = async (id) => {
     try {
@@ -185,9 +196,10 @@ module.exports = {
     userLogin,
     forgotPasswordService,
     verifyCodeService,
-    changePasswordService,
+    setPasswordService,
     getUserService,
     getSingleUserService,
     updateUserService,
-    deleteUserService
+    deleteUserService,
+    changePasswordService
 };
