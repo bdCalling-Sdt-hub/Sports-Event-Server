@@ -5,6 +5,7 @@ const Events = require("../models/Events");
 const User = require("../models/User");
 const { createEventsService } = require("../services/eventsService");
 
+//Create event
 const createEvents = async (req, res) => {
     try {
         //Checking permission
@@ -45,6 +46,7 @@ const createEvents = async (req, res) => {
     }
 };
 
+//All evets
 const allEvents = async (req, res) => {
     try {
         const search = req.query.search || ''; // Ensure search is not undefined
@@ -64,11 +66,11 @@ const allEvents = async (req, res) => {
         };
 
         const events = await Events.find(filter)
-                                   .limit(limit)
-                                   .skip((page - 1) * limit);
+            .limit(limit)
+            .skip((page - 1) * limit);
 
         if (events.length === 0) {
-            return res.status(404).json({ message: "Events not found" });
+            return res.status(404).json(Response({ message: "Events not found" }));
         }
 
         const totalEvents = await Events.countDocuments(filter);
@@ -90,11 +92,33 @@ const allEvents = async (req, res) => {
     }
 };
 
+//UPCOMMING EVENTS
+const upcommingEvents = async (req, res) => {
+    try {
+        const events = await Events.find({ date: { $gte: new Date() } })
+            .sort({ date: 1 })
+            .limit(5);
+
+        if (events.length === 0) {
+            return res.status(404).json(Response(Response({ message: "Events not found" })));
+        }
+
+        res.status(200).json(Response({
+            message: "Events retrieved successfully",
+            data: events,
+        }));
+    } catch (error) {
+        console.log(error);
+        res.status(500).json(Response({ message: "Internal server error" }));
+    }
+};
+
+//Delete event
 const deleteEvent = async (req, res) => {
     try {
         const adminId = req.body.userId;
         const admin = await User.findById(adminId);
-        
+
         if (!admin.isAdmin) {
             return res.status(401).json({
                 message: "You are not authorized",
@@ -106,7 +130,7 @@ const deleteEvent = async (req, res) => {
 
         const eventId = req.params.id;
         const event = await Events.findByIdAndDelete(eventId);
-        
+
         if (!event) {
             return res.status(404).json(Response({
                 message: "Event not found"
@@ -124,6 +148,7 @@ const deleteEvent = async (req, res) => {
     }
 };
 
+//Update events
 const updateEvent = async (req, res) => {
     try {
         const adminId = req.body.userId;
@@ -139,7 +164,7 @@ const updateEvent = async (req, res) => {
 
         const eventId = req.params.id;
         const event = await Events.findById(eventId);
-        
+
         if (!event) {
             return res.status(404).json({
                 status: "error",
@@ -185,6 +210,7 @@ const updateEvent = async (req, res) => {
     }
 };
 
+//Get single events
 const singleEvent = async (req, res) => {
     try {
         const userId = req.body.userId;
@@ -219,5 +245,6 @@ module.exports = {
     allEvents,
     deleteEvent,
     updateEvent,
-    singleEvent
+    singleEvent,
+    upcommingEvents
 };
